@@ -152,5 +152,28 @@ void loop() {
 
 <img width="999" height="441" alt="image" src="https://github.com/user-attachments/assets/cdaa4775-6243-4370-b4cf-20e30efe9e1a" />
 
+# 🚀 Future Enhancements
+- Voice feedback for obstacle alerts.
+- GPS tracking for outdoor navigation.
+- Battery-powered design.
+- Bluetooth low-energy support.
+- AI-based obstacle classification.
 
+# 📄 License
+This project is licensed under the MIT License – see the LICENSE file for details.
+
+---
+
+## 👩‍💻 Author
+
+**Kaviya Murugan, B.E. (Hons.)**  
+Creator of the **Blind Stick Navigator**, combining **IoT** and **Ultrasonic Sensing** to assist visually impaired individuals with safe navigation.  
+Passionate about applying **AI**, **Computer Vision**, and **IoT** for impactful real-world innovations.
+
+🔗 **GitHub**: [Kaviya-3016](https://github.com/Kaviya-3016)  
+🔗 **LinkedIn**: [Kaviya Murugan](https://www.linkedin.com/in/kaviyamurugan)
+
+---
+
+⭐ If you like this project, don't forget to star the repo and share it with others!
 
