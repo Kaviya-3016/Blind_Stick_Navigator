@@ -1,7 +1,5 @@
-# Blind_Stick_Navigator
-# Blind Stick Navigator (IoT-Based)
 
-![Project Thumbnail](project-thumbnail.png)
+# Blind Stick Navigator (IoT-Based)
 
 An **IoT-enabled assistive device** designed for visually impaired individuals.  
 It uses an **HC-SR04 ultrasonic sensor** to detect obstacles, a **buzzer** for audio alerts, and **Wi-Fi** for real-time data transmission to the **Thingzmate IoT Cloud**.
@@ -21,27 +19,19 @@ It uses an **HC-SR04 ultrasonic sensor** to detect obstacles, a **buzzer** for a
 - **ESP32 Dev Board**
 - **HC-SR04 Ultrasonic Sensor**
 - **Buzzer**
-- USB Cable for power
-- Wi-Fi Network
-
----
-
-## ⚡ Circuit Diagram
-![Circuit Diagram](circuit-diagram.png)
+- **USB Cable** for power
+- **Wi-Fi** Communication Protocol
 
 | ESP32 Pin | Component         | Pin Name |
 |-----------|-------------------|----------|
 | 27        | Ultrasonic Sensor | TRIG     |
 | 15        | Ultrasonic Sensor | ECHO     |
 | 26        | Buzzer            | Signal   |
-| 3V3       | Ultrasonic Sensor | VCC      |
-| 3V3       | Buzzer            | VCC      |
-| GND       | Ultrasonic Sensor | GND      |
-| GND       | Buzzer            | GND      |
 
 ---
 
 ## 💻 Setup Instructions
+
 1. Install the **Arduino IDE** and ESP32 board package.
 2. Install required libraries:
    - `WiFi.h`
@@ -61,3 +51,106 @@ Example payload:
   "distance_cm": 5.42,
   "object_detected": true
 }
+
+```
+# Source Code
+
+```
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+// WiFi credentials
+#define WIFI_SSID "Durga"
+#define WIFI_PASSWORD "passwordilla"
+
+// Ultrasonic sensor pins
+#define TRIG_PIN 27
+#define ECHO_PIN 15
+
+// Thingzmate cloud URL and Authorization token
+const char *serverUrl = "https://eas.thingzmate.com/api/v1/device-types/00004/devices/0004/uplink";
+String AuthorizationToken = "Bearer 668696d0daff55459c5264a295952b72";
+
+void setup() {
+  Serial.begin(115200);
+  delay(3000);
+
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi Connected!");
+}
+
+float getDistanceCM() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(5);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000); // 30ms timeout
+  if (duration == 0) {
+    Serial.println("Timeout: No echo received");
+    return -1.0;
+  }
+
+  float distance = duration * 0.034 / 2.0;
+  return distance;
+}
+
+void loop() {
+  float distance = getDistanceCM();
+  bool objectDetected = false;
+
+  if (distance <= 10 && distance > 0) {
+    objectDetected = true;
+    Serial.println("⚠️ Obstacle detected within 10 cm!");
+  }
+
+  Serial.print("Measured Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Prepare HTTP request to Thingzmate
+  HTTPClient http;
+  http.begin(serverUrl);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Authorization", AuthorizationToken);
+
+  // Create JSON body
+  String message = "{\"distance_cm\":" + String(distance, 2) + 
+                   ",\"object_detected\":" + (objectDetected ? "true" : "false") + "}";
+
+  Serial.println("Sending: " + message);
+
+  int httpResponseCode = http.POST(message);
+
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.println("✅ HTTP Response code: " + String(httpResponseCode));
+    Serial.println("📦 Response: " + response);
+  } else {
+    Serial.print("❌ HTTP Error code: ");
+    Serial.println(httpResponseCode);
+  }
+
+  http.end();
+  delay(10000);  // Send data every 10 seconds
+}
+
+```
+# Serial Monitor Output
+<img width="583" height="466" alt="image" src="https://github.com/user-attachments/assets/ed4c7cef-c501-446f-a5f9-b72468a08e1b" />
+
+# Thingzmate Cloud Output
+
+<img width="999" height="441" alt="image" src="https://github.com/user-attachments/assets/cdaa4775-6243-4370-b4cf-20e30efe9e1a" />
+
+
+
